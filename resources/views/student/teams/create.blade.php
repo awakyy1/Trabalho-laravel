@@ -1,12 +1,18 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold">Nova Equipe</h2>
-    </x-slot>
+    <x-slot name="header"><h2 class="text-xl font-semibold">Create a team</h2></x-slot>
 
-    <form method="POST" action="{{ route('teams.store') }}" class="space-y-4">
-        @csrf
-        <input name="name" class="w-full border p-2" placeholder="Nome da equipe">
-        @error('name') <div class="text-red-600">{{ $message }}</div> @enderror
-        <button class="btn btn-primary">Salvar</button>
-    </form>
+    <div class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
+        <form method="POST" action="{{ route('teams.store') }}" class="space-y-4">
+            @csrf
+            <label class="block">Name
+                <input name="name" maxlength="255" required value="{{ old('name') }}" class="w-full border p-2">
+            </label>
+            @error('name') <p class="text-red-600">{{ $message }}</p> @enderror
+            <label class="block">Description
+                <textarea name="description" maxlength="2000" class="w-full border p-2">{{ old('description') }}</textarea>
+            </label>
+            @error('description') <p class="text-red-600">{{ $message }}</p> @enderror
+            <button class="px-4 py-2 bg-indigo-600 text-white rounded">Create team</button>
+        </form>
+    </div>
 </x-app-layout>

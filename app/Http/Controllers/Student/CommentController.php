@@ -4,33 +4,30 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\SubmissionVersion;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): RedirectResponse
     {
-        // valida entrada
         $data = $request->validate([
-            'submission_version_id' => 'required|exists:submission_versions,id',
-            'body'                  => 'required|string|max:2000',
+            'submission_version_id' => ['required', 'integer', 'exists:submission_versions,id'],
+            'body' => ['required', 'string', 'max:2000'],
         ]);
-
-        // garante que o usuário faz parte da equipe
-        $version = SubmissionVersion::with('submission.team.users')
-                    ->findOrFail($data['submission_version_id']);
-
+        $version = SubmissionVersion::with('submission.team')->findOrFail(
+            $data['submission_version_id']
+        );
         abort_unless(
-            $version->submission->team->users->contains($request->user()->id),
+            $version->submission->team->users()->whereKey($request->user()->id)->exists(),
             403
         );
 
-        // cria comentário
         $version->comments()->create([
             'user_id' => $request->user()->id,
-            'body'    => $data['body'],
+            'body' => $data['body'],
         ]);
 
-        return back();
+        return back()->with('status', 'comment-created');
     }
 }
